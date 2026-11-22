@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Create a bouquet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500;1,600&family=Nunito:wght@500;600&family=Caveat:wght@500;600&family=Noto+Sans+KR:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Night sky -->
+  <div class="sky" id="sky" aria-hidden="true">
+    <canvas id="stars"></canvas>                       <!-- twinkling + shooting stars -->
+    <div class="sky__glow" id="skyGlow"></div>          <!-- soft light that follows the pointer -->
+    <div class="moon" id="moon">
+      <canvas id="moonCanvas" width="256" height="256"></canvas>   <!-- 3D textured moon -->
+    </div>
+  </div>
+
+  <!-- Entrance particles -->
+  <canvas id="intro" aria-hidden="true"></canvas>
+
+  <!-- Top left: song picker (circle that expands) -->
+  <div class="song-orb" id="songOrb">
+    <button class="song-orb__toggle" id="songToggle" aria-label="Choose a song" aria-expanded="false">
+      <!-- Shows the vinyl image once assets/icons/vinyl.png exists; until then a plain dot -->
+      <img class="song-orb__vinyl" alt="" draggable="false" width="44" height="44" style="max-width:44px;max-height:44px" />
+      <span class="song-orb__dot"></span>
+    </button>
+    <ul class="song-orb__list" id="songList"></ul>
+  </div>
+
+  <!-- Top right: volume slider + music on/off -->
+  <div class="music-ctrl" id="musicCtrl">
+    <input class="volume" id="volume" type="range" min="0" max="100" step="1" value="70" aria-label="Volume" />
+    <!-- PLACEHOLDER: plain text glyph, swap for an assets/icons image later -->
+    <button class="music-toggle" id="musicToggle" type="button" aria-label="Turn music off" aria-pressed="true">
+      <span class="music-toggle__glyph">&#9834;</span>
+    </button>
+  </div>
+
+  <!-- Small notice (e.g. a song file could not be found) -->
+  <p class="notice" id="notice" role="status"></p>
+
+  <!-- Random message (appears above the box after each flower) -->
+  <p class="message" id="message" aria-live="polite"></p>
+
+  <!-- Wrapper (PLACEHOLDER shape drawn in CSS; swap for assets/wrapper image later) -->
+  <div class="wrapper" id="wrapper" aria-hidden="true">
+    <div class="wrapper__paper"></div>
+  </div>
+
+  <!-- Flowers float inside this layer -->
+  <div class="flower-layer" id="flowerLayer"></div>
+
+  <!-- After the bouquet forms: secret message + envelope -->
+  <div class="reveal" id="reveal">
+    <p class="secret" id="secret"></p>
+    <!-- PLACEHOLDER: envelope drawn in CSS; swap for an assets/ image later -->
+    <button class="envelope" id="envelope" type="button" aria-label="Open the letter">
+      <span class="envelope__body"></span>
+      <span class="envelope__flap"></span>
+    </button>
+  </div>
+
+  <!-- The letter -->
+  <div class="letter" id="letter" role="dialog" aria-modal="true" aria-label="Letter">
+    <div class="letter__paper" id="letterPaper">
+      <button class="letter__close" id="letterClose" type="button" aria-label="Close letter">&times;</button>
+      <div class="letter__scroll" id="letterScroll">
+        <div class="letter__text" id="letterText"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main floating box -->
+  <div class="stage" id="stage">
+    <button class="box" id="boxBtn" type="button">
+      <span class="box__label" id="boxLabel">Create a bouquet</span>
+    </button>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
