@@ -49,50 +49,50 @@ button:focus-visible { outline: 2px solid var(--moon); outline-offset: 4px; }
 .sky {
   position: fixed; inset: 0;
   background:
-    radial-gradient(ellipse at calc(72% + var(--gx, 0px)) calc(18% + var(--gy, 0px)), var(--night-glow) 0%, transparent 55%),
+    radial-gradient(ellipse at 72% 18%, var(--night-glow) 0%, transparent 55%),
     linear-gradient(180deg, var(--night-mid) 0%, var(--night-deep) 100%);
   overflow: hidden;
 }
 
-.moon {
+/* ============ Moon: simple, floating, softly glowing ============ */
+.moon-wrap {
   position: absolute;
   top: 12%; left: 68%;
   width: clamp(90px, 12vw, 150px);
   aspect-ratio: 1;
+  animation: moon-float 8s ease-in-out infinite;
+}
+
+.moon-halo {                       /* the little glow around the moon */
+  position: absolute; inset: -80%;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #ffffff, var(--moon) 55%, #d9ccf5 100%);
-  box-shadow:
-    0 0 40px 12px var(--moon-glow),
-    0 0 120px 50px rgba(160, 130, 230, 0.28);
-  animation: moon-breathe 7s ease-in-out infinite;
+  background: radial-gradient(circle, rgba(200, 172, 255, 0.26) 0%, rgba(150, 110, 235, 0.1) 38%, transparent 66%);
+  animation: halo-pulse 7s ease-in-out infinite;
+  pointer-events: none;
 }
 
-@keyframes moon-breathe {
-  0%, 100% { box-shadow: 0 0 40px 12px var(--moon-glow), 0 0 120px 50px rgba(160,130,230,.28); }
-  50%      { box-shadow: 0 0 52px 18px var(--moon-glow), 0 0 140px 60px rgba(160,130,230,.36); }
+.moon {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background:                      /* a few misty craters, nothing heavy */
+    radial-gradient(circle at 64% 28%, rgba(160, 140, 205, 0.4), transparent 8%),
+    radial-gradient(circle at 36% 62%, rgba(160, 140, 205, 0.34), transparent 11%),
+    radial-gradient(circle at 70% 68%, rgba(160, 140, 205, 0.3), transparent 7%),
+    radial-gradient(circle at 28% 30%, rgba(160, 140, 205, 0.25), transparent 6%),
+    radial-gradient(circle at 35% 35%, #ffffff, var(--moon) 55%, #d9ccf5 100%);
+  box-shadow: 0 0 28px 8px var(--moon-glow);
 }
 
+@keyframes moon-float {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 -12px; }
+}
+@keyframes halo-pulse {
+  0%, 100% { opacity: 0.75; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.08); }
+}
 
 #stars { position: absolute; inset: 0; width: 100%; height: 100%; }
-
-/* Soft light that follows the pointer */
-.sky__glow {
-  position: absolute; left: 0; top: 0;
-  width: 460px; height: 460px;
-  margin: -230px 0 0 -230px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(196, 168, 255, 0.24) 0%, rgba(150, 110, 235, 0.1) 40%, transparent 68%);
-  mix-blend-mode: screen;
-  opacity: 0;
-  transition: opacity 0.9s ease;
-  pointer-events: none;
-  will-change: transform;
-}
-.sky__glow.on { opacity: 1; }
-
-/* 3D moon is drawn on a canvas; the CSS circle only supplies the glow */
-.moon.is-3d { background: none; will-change: transform; }
-.moon canvas { display: block; width: 100%; height: 100%; border-radius: 50%; }
 
 /* ============ Intro canvas ============ */
 #intro {
@@ -405,7 +405,7 @@ button:focus-visible { outline: 2px solid var(--moon); outline-offset: 4px; }
 
 /* Phones (portrait) */
 @media (max-width: 600px) {
-  .moon { top: 13%; left: 55%; width: 76px; }
+  .moon-wrap { top: 13%; left: 55%; width: 76px; }
   :root { --orb: 46px; }
   .music-ctrl { padding-left: 14px; }
   .volume { width: 78px; }
@@ -423,7 +423,7 @@ button:focus-visible { outline: 2px solid var(--moon); outline-offset: 4px; }
 /* Phones in landscape / short windows */
 @media (max-height: 480px) {
   :root { --bottom-gap: calc(70px + env(safe-area-inset-bottom, 0px)); }
-  .moon { top: 10%; width: 56px; }
+  .moon-wrap { top: 10%; width: 56px; }
   .message { font-size: 1rem; bottom: calc(var(--bottom-gap) + 40px); }
 }
 
@@ -540,17 +540,6 @@ button:focus-visible { outline: 2px solid var(--moon); outline-offset: 4px; }
   overflow-wrap: anywhere;
 }
 
-.letter__close {
-  position: absolute; top: -14px; right: -10px;
-  z-index: 2;
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  background: var(--night-mid);
-  color: var(--ink);
-  font-size: 1.5rem; line-height: 1;
-  box-shadow: 0 4px 14px rgba(5, 0, 20, 0.5);
-}
-
 .ink { animation: ink-in 0.35s ease-out both; }
 @keyframes ink-in {
   from { opacity: 0; filter: blur(2px); }
@@ -566,6 +555,36 @@ button:focus-visible { outline: 2px solid var(--moon); outline-offset: 4px; }
 }
 @keyframes pen-blink { 50% { opacity: 0; } }
 
+/* "All done" button at the end of the letter */
+.letter__done {
+  display: none;
+  margin: calc(var(--lh) * 0.6) auto 0;
+  padding: 0.3rem 1.8rem 0.4rem;
+  border-radius: 999px;
+  font-family: "Caveat", "Segoe Script", "Bradley Hand", cursive;
+  font-size: calc(var(--fs) * 1.05);
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #9a72e6, #6d4fb5);
+  box-shadow: 0 6px 18px rgba(80, 50, 150, 0.4);
+}
+.letter__done.show { display: block; animation: done-in 0.7s var(--ease-soft) both; }
+.letter__done:active { scale: 0.96; }
+@keyframes done-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.9); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* While the letter rolls up */
+.letter__paper.rolling .letter__scroll { overflow: hidden; }
+.letter__roll {
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, #a48f68 0%, #d9c59b 14%, #fff5df 38%, #f1e1bf 62%, #cdb68a 86%, #9c875f 100%);
+}
+
 /* Phone on its side: message and envelope sit to the right of the bouquet */
 @media (max-height: 480px) and (min-aspect-ratio: 12/10) {
   .reveal {
@@ -580,8 +599,438 @@ button:focus-visible { outline: 2px solid var(--moon); outline-offset: 4px; }
   .letter__scroll { max-height: 80vh; }
 }
 
+/* ---- keep the roll smooth on phones: drop heavy effects while it plays ---- */
+.letter.is-rolling {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: rgba(15, 6, 35, 0.78);
+}
+.letter__paper.rolling {
+  box-shadow: none;
+  border-radius: 28px / 14px;
+  transition: none;
+  will-change: transform, opacity;
+}
+
+/* the night scene is frozen once the letter starts to roll */
+.finale .flower__img, .finale .flower__svg, .finale .flower__pop, .finale .flower::before,
+.finale .moon-wrap, .finale .moon-halo, .finale .box, .finale .envelope {
+  animation-play-state: paused;
+}
+
+/* ============ Finale: white screen, falling paper, image cards ============ */
+.whiteout {
+  position: fixed; inset: 0;
+  z-index: 60;
+  background: #ffffff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Once everything is white, the music controls stay usable above it */
+.is-white .song-orb,
+.is-white .music-ctrl {
+  z-index: 70;
+  background: rgba(110, 80, 170, 0.12);
+  border-color: rgba(110, 80, 170, 0.35);
+  color: #3f2877;
+}
+.is-white .notice { z-index: 75; }
+.is-white .song-orb__item[aria-current="true"] { background: rgba(110, 80, 170, 0.16); }
+@media (hover: hover) { .is-white .song-orb__item:hover { background: rgba(110, 80, 170, 0.1); } }
+.is-white .song-orb__dot { background: #7a55c9; box-shadow: none; }
+.is-white .music-toggle[aria-pressed="false"] .music-toggle__glyph::after { background: #3f2877; }
+.is-white .volume::-webkit-slider-runnable-track {
+  background: linear-gradient(to right, #7a55c9 var(--v), rgba(90, 60, 150, 0.25) var(--v));
+}
+.is-white .volume::-webkit-slider-thumb { background: #7a55c9; box-shadow: 0 0 8px rgba(122, 85, 201, 0.5); }
+.is-white .volume::-moz-range-track { background: rgba(90, 60, 150, 0.25); }
+.is-white .volume::-moz-range-progress { background: #7a55c9; }
+.is-white .volume::-moz-range-thumb { background: #7a55c9; box-shadow: 0 0 8px rgba(122, 85, 201, 0.5); }
+
+/* the night scene is no longer needed once the screen is white */
+.bg-off .sky, .bg-off .flower-layer, .bg-off .wrapper, .bg-off .stage,
+.bg-off .reveal, .bg-off .message, .bg-off .letter { visibility: hidden; }
+
+#confetti {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 64;
+  pointer-events: none;
+}
+
+/* Image cards */
+.card {
+  position: absolute; left: 0;
+  box-sizing: border-box;
+  border: 5px solid #fff;
+  border-radius: 14px;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 8px 22px rgba(80, 50, 140, 0.22);
+}
+
+.card-layer { position: fixed; inset: 0; z-index: 66; pointer-events: none; }
+.card--float { top: 0; will-change: transform; pointer-events: auto; cursor: pointer; }
+.card--float::after {
+  content: ""; position: absolute; inset: -5px;
+  border-radius: 18px;
+  pointer-events: none;
+}
+.card--float.ready::after { animation: card-pulse 1.8s ease-out infinite; }
+.card--float.snapped::after { animation: card-snap 0.6s ease-out both; }
+@keyframes card-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(140, 100, 230, 0.45); }
+  100% { box-shadow: 0 0 0 24px rgba(140, 100, 230, 0); }
+}
+@keyframes card-snap {
+  0%   { box-shadow: 0 0 0 0 rgba(140, 100, 230, 0.7); }
+  100% { box-shadow: 0 0 0 40px rgba(140, 100, 230, 0); }
+}
+
+/* the empty spot the card slots into, like a puzzle piece */
+.slot {
+  position: absolute; left: 0; top: 0;
+  box-sizing: border-box;
+  border: 2px dashed rgba(122, 85, 201, 0.5);
+  border-radius: 14px;
+  background: rgba(122, 85, 201, 0.07);
+  opacity: 0;
+}
+
+/* The wall of cards */
+.wall { position: fixed; inset: 0; z-index: 62; overflow: hidden; pointer-events: none; }
+.wall__col { position: absolute; top: 0; bottom: 0; }
+.wall__strip { position: absolute; left: 0; width: 100%; will-change: transform; }
+.wall .card.fade-in { opacity: 0; animation: card-in 0.55s var(--ease-soft) var(--delay, 0s) both; }
+@keyframes card-in {
+  from { opacity: 0; transform: scale(0.8) rotate(-6deg); }
+  to   { opacity: 1; transform: none; }
+}
+.wall.scrolling .wall__strip.up   { animation: wall-up var(--dur) linear infinite; }
+.wall.scrolling .wall__strip.down { animation: wall-down var(--dur) linear infinite; }
+@keyframes wall-up   { from { transform: translateY(0); } to { transform: translateY(calc(-1 * var(--travel))); } }
+@keyframes wall-down { from { transform: translateY(calc(-1 * var(--travel))); } to { transform: translateY(0); } }
+
+/* ============ After the wall: messages, gift, file ============ */
+.dim {
+  position: fixed; inset: 0;
+  z-index: 63;
+  background: radial-gradient(ellipse at center, rgba(50, 28, 95, 0.58), rgba(30, 15, 65, 0.74));
+  opacity: 0;
+  pointer-events: none;
+}
+
+.finale-msg {
+  position: fixed; left: 50%; top: 50%;
+  z-index: 67;
+  width: min(86vw, 640px);
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  font-size: clamp(1.7rem, 6vw, 3rem);
+  line-height: 1.25;
+  color: #fff;
+  text-shadow: 0 2px 18px rgba(30, 10, 70, 0.65);
+  opacity: 0;
+  pointer-events: none;
+}
+.finale-msg.show { animation: msg-in 0.7s var(--ease-soft) both; }
+.finale-msg.hide { animation: msg-out 0.6s ease-in both; }
+@keyframes msg-in {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 14px)); }
+  to   { opacity: 1; transform: translate(-50%, -50%); }
+}
+@keyframes msg-out {
+  from { opacity: 1; transform: translate(-50%, -50%); }
+  to   { opacity: 0; transform: translate(-50%, calc(-50% - 10px)); }
+}
+
+.gather-layer { position: fixed; inset: 0; z-index: 66; pointer-events: none; overflow: hidden; }
+.gather-card { top: 0; left: 0; will-change: transform; }
+
+/* Gift (placeholder drawn in CSS) */
+.gift-layer {
+  position: fixed; inset: 0;
+  z-index: 66;
+  display: grid; place-items: center;
+  visibility: hidden;
+  pointer-events: none;
+}
+.gift-layer.show { visibility: visible; }
+.gift-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  gap: clamp(16px, 3.5vh, 30px);
+  transform: translateY(-2vh);
+}
+
+.gift {
+  --g: clamp(120px, min(36vw, 38vh), 250px);
+  position: relative;
+  width: var(--g); height: var(--g);
+  pointer-events: auto;
+  cursor: pointer;
+  opacity: 0;
+  transform-origin: 50% 90%;
+  -webkit-tap-highlight-color: transparent;
+}
+.gift.in { animation: gift-pop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both, gift-wiggle 3s ease-in-out 1s infinite; }
+.gift.opened { animation: none; opacity: 1; pointer-events: none; }
+@keyframes gift-pop {
+  from { opacity: 0; transform: scale(0.3); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes gift-wiggle {
+  0%, 38%, 100% { rotate: 0deg; }
+  8%  { rotate: -4deg; }
+  16% { rotate: 4deg; }
+  24% { rotate: -3deg; }
+  32% { rotate: 2deg; }
+}
+
+.gift__box {
+  position: absolute; left: 6%; right: 6%; top: 34%; bottom: 0;
+  border-radius: 6px 6px 12px 12px;
+  background: linear-gradient(160deg, #ee6a80, #c93e58);
+  box-shadow: 0 16px 28px rgba(160, 40, 70, 0.28), inset -10px 0 18px rgba(0, 0, 0, 0.08);
+}
+.gift__box::after,
+.gift__lid::after {            /* the ribbon */
+  content: "";
+  position: absolute; top: 0; bottom: 0; left: 50%;
+  width: 17%;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, #f3c866, #ffe9a8 50%, #f3c866);
+}
+.gift__lid {
+  position: absolute; left: 0; right: 0; top: 16%; height: 24%;
+  border-radius: 8px;
+  background: linear-gradient(160deg, #f47c91, #d84a64);
+  box-shadow: 0 6px 12px rgba(160, 40, 70, 0.25);
+}
+.gift__bow {
+  position: absolute; left: 50%; top: -22%;
+  width: 48%; height: 28%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+.gift__bow::before,
+.gift__bow::after {            /* the two loops */
+  content: "";
+  position: absolute; top: 8%;
+  width: 50%; height: 84%;
+  border: clamp(5px, 1.3vw, 8px) solid #f3c866;
+  border-radius: 50%;
+  background: rgba(255, 233, 168, 0.25);
+  box-sizing: border-box;
+}
+.gift__bow::before { left: 0;  transform: rotate(-24deg); transform-origin: 100% 100%; }
+.gift__bow::after  { right: 0; transform: rotate(24deg);  transform-origin: 0 100%; }
+.gift__knot {
+  position: absolute; left: 50%; bottom: 0;
+  width: 24%; aspect-ratio: 1;
+  transform: translate(-50%, 30%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffe9a8, #f3c866);
+  z-index: 2;
+}
+
+.gift__note {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  font-size: clamp(1.4rem, 4.6vw, 2.1rem);
+  color: #5a3a9a;
+  text-align: center;
+  opacity: 0;
+}
+.gift__note.in { animation: note-in 0.8s ease 0.7s both; }
+@keyframes note-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.spark {
+  position: fixed; left: 0; top: 0;
+  z-index: 69;
+  pointer-events: none;
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+}
+
+/* The presents: a letter and a video tape */
+.doc {
+  position: fixed; left: 50%; top: 50%;
+  z-index: 68;
+  width: min(92vw, 600px);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+}
+.doc.show { pointer-events: auto; }
+.presents {
+  max-height: 94vh;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 2.2rem 0.5rem 1rem;
+  text-align: center;
+  color: #3b2a58;
+  scrollbar-width: none;
+}
+.presents::-webkit-scrollbar { display: none; }
+.presents__text {
+  margin: 0 auto 1.6rem;
+  max-width: 28ch;
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 600;
+  font-size: clamp(1.4rem, 4.6vw, 1.9rem);
+  line-height: 1.25;
+  color: #3b2a58;
+}
+.presents__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 2rem 1.4rem;
+  align-items: start;
+}
+.present {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0.35rem;
+}
+.doc.show .present { animation: float 5s ease-in-out 1s infinite; }
+.doc.show .present:nth-child(2) { animation-duration: 6s; animation-delay: 1.8s; }
+.present__label {
+  margin-top: 0.9rem;
+  font-weight: 600; font-size: 0.95rem;
+  color: #3b2a58;
+}
+.present__file {
+  max-width: 100%;
+  font-size: 0.74rem; color: #6d5a8c;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.present__status { min-height: 1.2em; font-size: 0.8rem; color: #5a3a9a; }
+
+/* ---- the letter: a cream envelope with a wax seal and a note peeking out ---- */
+.letter-gift {
+  position: relative;
+  display: block;
+  width: min(100%, 250px);
+  aspect-ratio: 200 / 150;
+  filter: drop-shadow(0 16px 22px rgba(10, 4, 30, 0.45));
+  transition: transform 0.25s var(--ease-soft);
+}
+.letter-gift svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.lg__back  { z-index: 0; }
+.lg__front { z-index: 2; }
+.lg__paper {
+  position: absolute; z-index: 1;
+  left: 9%; right: 9%; top: 6%; bottom: 40%;
+  display: flex; flex-direction: column; align-items: center;
+  padding-top: 7%;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, #fffdf6, #fbf3df);
+  box-shadow: 0 0 0 1px rgba(160, 120, 60, 0.18);
+  color: #5a3a2a;
+  transition: transform 0.35s var(--ease-soft);
+}
+.lg__paperTitle {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 700;
+  font-size: clamp(1.05rem, 4vw, 1.35rem);
+  line-height: 1.05;
+}
+.lg__paperSub {
+  margin-top: 0.2rem;
+  font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: #a07c5a;
+}
+.lg__lines {
+  margin-top: 0.45rem; width: 76%; height: 18%;
+  background: repeating-linear-gradient(180deg, transparent 0 5px, rgba(160, 120, 90, 0.3) 5px 6px);
+}
+.letter-gift:disabled { cursor: default; }
+@media (hover: hover) {
+  .letter-gift:not(:disabled):hover { transform: translateY(-3px) rotate(-1.5deg); }
+  .letter-gift:not(:disabled):hover .lg__paper { transform: translateY(-14%); }
+}
+.letter-gift:active { transform: scale(0.97); }
+
+/* ---- the video tape: a VHS cassette drawn in CSS ---- */
+.vhs {
+  position: relative;
+  display: block;
+  width: min(100%, 250px);
+  aspect-ratio: 100 / 62;
+  border-radius: 7px;
+  background: linear-gradient(165deg, #3a3a46, #1f1f27);
+  box-shadow: 0 16px 24px rgba(10, 4, 30, 0.5), inset 0 0 0 2px rgba(255, 255, 255, 0.06), inset 0 -6px 10px rgba(0, 0, 0, 0.35);
+  transition: transform 0.25s var(--ease-soft);
+}
+.vhs__label {
+  position: absolute; left: 7%; right: 7%; top: 8%; height: 40%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #fffdf6, #f1e7d0);
+  color: #3a2a2a;
+  overflow: hidden;
+}
+.vhs__title {
+  margin-top: 0;
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 700;
+  font-size: clamp(1rem, 3.6vw, 1.25rem);
+  line-height: 1;
+}
+.vhs__sub {
+  margin-top: 0.15rem; margin-bottom: 0.2rem;
+  font-size: 0.45rem; letter-spacing: 0.12em;
+  color: #8a7466;
+}
+.vhs__window {
+  position: absolute; left: 18%; right: 18%; bottom: 9%; height: 32%;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 7%;
+  border-radius: 999px;
+  background: #0d0d12;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.8), 0 0 0 1.5px rgba(255, 255, 255, 0.08);
+}
+.vhs__reel {
+  width: 38%; aspect-ratio: 1;
+  max-height: 88%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #15151b 0 26%, transparent 27%),
+    repeating-conic-gradient(#f4f0e8 0 24deg, #bdb8ad 24deg 60deg);
+}
+.vhs__reel:first-child { width: 31%; }
+.vhs__strand {
+  position: absolute; left: 22%; right: 22%; top: 50%; height: 2px;
+  background: #5a4636;
+  z-index: -1;
+}
+.vhs__foot {
+  position: absolute; left: 24%; right: 24%; bottom: 0; height: 6%;
+  border-radius: 3px 3px 0 0;
+  background: #14141a;
+}
+.vhs:disabled { cursor: default; }
+.doc.show .vhs__reel { animation: reel-spin 5s linear infinite; }
+@keyframes reel-spin { to { rotate: 360deg; } }
+@media (hover: hover) { .vhs:not(:disabled):hover { transform: translateY(-3px) rotate(1.5deg); } }
+.vhs:active { transform: scale(0.97); }
+
+@media (max-height: 480px) {
+  .presents { padding-top: 0.6rem; }
+  .presents__text { margin-bottom: 0.8rem; font-size: 1.15rem; }
+  .presents__row { grid-template-columns: 1fr 1fr; gap: 0 1rem; }
+  .letter-gift, .vhs { width: min(100%, 170px); }
+  .present__label { margin-top: 0.5rem; font-size: 0.82rem; }
+}
+
 /* ============ Reduced motion ============ */
 @media (prefers-reduced-motion: reduce) {
   .flower::before { display: none; }
-  .moon, .box.show, .flower__svg, .flower__img, .song-orb__vinyl, .envelope.show, .ink, .pen { animation: none; }
+  .gift.in, .gift__note.in, .doc.show .present, .doc.show .vhs__reel, .card--float::after, .moon-wrap, .moon-halo, .box.show, .flower__svg, .flower__img, .song-orb__vinyl, .envelope.show, .ink, .pen { animation: none; }
+  .gift.in, .gift__note.in { opacity: 1; }
 }

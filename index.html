@@ -12,11 +12,11 @@
 <body>
 
   <!-- Night sky -->
-  <div class="sky" id="sky" aria-hidden="true">
-    <canvas id="stars"></canvas>                       <!-- twinkling + shooting stars -->
-    <div class="sky__glow" id="skyGlow"></div>          <!-- soft light that follows the pointer -->
-    <div class="moon" id="moon">
-      <canvas id="moonCanvas" width="256" height="256"></canvas>   <!-- 3D textured moon -->
+  <div class="sky" aria-hidden="true">
+    <canvas id="stars"></canvas>          <!-- twinkling + shooting stars -->
+    <div class="moon-wrap">               <!-- floats gently -->
+      <div class="moon-halo"></div>
+      <div class="moon"></div>
     </div>
   </div>
 
@@ -69,10 +69,11 @@
   <!-- The letter -->
   <div class="letter" id="letter" role="dialog" aria-modal="true" aria-label="Letter">
     <div class="letter__paper" id="letterPaper">
-      <button class="letter__close" id="letterClose" type="button" aria-label="Close letter">&times;</button>
       <div class="letter__scroll" id="letterScroll">
         <div class="letter__text" id="letterText"></div>
+        <button class="letter__done" id="letterDone" type="button">All done</button>
       </div>
+      <div class="letter__roll" id="letterRoll"></div>   <!-- paper-roll shading used when the letter rolls up -->
     </div>
   </div>
 
@@ -81,6 +82,48 @@
     <button class="box" id="boxBtn" type="button">
       <span class="box__label" id="boxLabel">Create a bouquet</span>
     </button>
+  </div>
+
+  <!-- Finale: white screen, falling paper bits, floating image card, card wall -->
+  <div class="whiteout" id="whiteout"></div>
+  <div class="wall" id="wall" aria-hidden="true"></div>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+  <div class="card-layer" id="cardLayer"></div>
+
+  <!-- After the wall: messages, cards gather into a gift, the file -->
+  <div class="dim" id="dim"></div>
+  <p class="finale-msg" id="finaleMsg" aria-live="polite"></p>
+  <div class="gather-layer" id="gatherLayer"></div>
+
+  <!-- Gift (PLACEHOLDER drawn in CSS; swap for an assets/ image later) -->
+  <div class="gift-layer" id="giftLayer">
+    <div class="gift-wrap" id="giftWrap">
+      <div class="gift" id="gift" role="button" tabindex="0" aria-label="Open the gift">
+        <div class="gift__box"></div>
+        <div class="gift__lid" id="giftLid">
+          <div class="gift__bow"><span class="gift__knot"></span></div>
+        </div>
+      </div>
+      <p class="gift__note" id="giftNote"></p>
+    </div>
+  </div>
+
+  <!-- The file that pops out of the gift -->
+  <div class="doc" id="doc">
+    <div class="doc__sheet">
+      <div class="doc__band"><span class="doc__tag">A little gift for you</span></div>
+      <h2 class="doc__title" id="docTitle"></h2>
+      <p class="doc__text" id="docText"></p>
+      <div class="doc__file">
+        <span class="doc__icon" aria-hidden="true">FILE</span>
+        <span class="doc__fileinfo"><b id="docName"></b><small>Ready to download</small></span>
+      </div>
+      <button class="doc__btn" id="docBtn" type="button">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
+        <span id="docBtnText"></span>
+      </button>
+      <p class="doc__status" id="docStatus" role="status"></p>
+    </div>
   </div>
 
   <script src="js/main.js"></script>
